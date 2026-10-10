@@ -51,7 +51,7 @@ nse-market-data-downloader/
 ### 1. Clone the repository
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+git clone https://github.com/vasanthi988/nse-market-data-downloader.git
 cd nse-market-data-downloader
 ```
 
@@ -67,7 +67,7 @@ python -m venv .venv
 ### 3. Install dependencies
 
 ```powershell
-pip install requests
+pip install -r requirements.txt
 ```
 
 ### 4. Download market data
