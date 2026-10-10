@@ -69,3 +69,41 @@ def test_save_csv_handles_empty_records(tmp_path, monkeypatch, caplog):
     assert count == 0
     assert not output_file.exists()
     assert "No records returned" in caplog.text
+from src.storage import save_records
+from src.validator import validate_records
+
+
+def test_save_records_writes_csv(tmp_path):
+    records = [
+        {"symbol": "ABC", "price": 100},
+        {"symbol": "XYZ", "price": 200},
+    ]
+
+    count = save_records(records, "sample.csv", tmp_path)
+
+    assert count == 2
+    assert (tmp_path / "sample.csv").exists()
+
+
+def test_validate_records_passes_valid_data():
+    records = [
+        {"symbol": "ABC", "price": 100.0},
+        {"symbol": "XYZ", "price": 200.0},
+    ]
+
+    result = validate_records(records, required_fields=["symbol"])
+
+    assert result["passed"] is True
+    assert result["total_records"] == 2
+
+
+def test_validate_records_detects_duplicate_symbols():
+    records = [
+        {"symbol": "ABC"},
+        {"symbol": "ABC"},
+    ]
+
+    result = validate_records(records)
+
+    assert result["duplicate_records"] == 1
+    assert result["passed"] is False
