@@ -8,6 +8,8 @@ from datetime import datetime
 from pathlib import Path
 
 from requests.exceptions import RequestException
+from src.storage import save_records
+from src.validator import validate_records
 from src.downloader import create_session
 
 BASE_URL = "https://www.nseindia.com"
@@ -26,54 +28,23 @@ setup_logging()
 
 
 def save_csv(filename, records):
-    """Save records and return the actual number of CSV data rows."""
+    """Validate and save records through the storage module."""
     if not isinstance(records, list):
         raise ValueError(f"Expected a list of records: {filename}")
-
-    filepath = OUTPUT_DIR / filename
-
-    if not records:
-        # Remove stale data so an old file isn't mistaken for fresh data.
-        if filepath.exists():
-            filepath.unlink()
-        logging.warning("No records returned for %s", filename)
-        return 0
 
     if not all(isinstance(record, dict) for record in records):
         raise ValueError(f"Invalid record format in {filename}")
 
-    columns = list(dict.fromkeys(
-        key for record in records for key in record.keys()
-    ))
+    validation_result = validate_records(records)
 
-    if not columns:
-        raise ValueError(f"No columns found in {filename}")
-
-    with filepath.open("w", newline="", encoding="utf-8-sig") as file:
-        writer = csv.DictWriter(file, fieldnames=columns)
-        writer.writeheader()
-
-        for record in records:
-            row = {}
-            for key in columns:
-                value = record.get(key, "")
-                if isinstance(value, (dict, list)):
-                    value = json.dumps(value, ensure_ascii=False)
-                row[key] = value
-            writer.writerow(row)
-
-    # Verify the number of rows actually written.
-    with filepath.open("r", newline="", encoding="utf-8-sig") as file:
-        actual_count = max(sum(1 for _ in csv.reader(file)) - 1, 0)
-
-    if actual_count != len(records):
-        raise IOError(
-            f"CSV row count mismatch for {filename}: "
-            f"expected {len(records)}, found {actual_count}"
+    if not validation_result["passed"]:
+        logging.warning(
+            "Data validation issues in %s: %s",
+            filename,
+            validation_result,
         )
 
-    logging.info("Saved %s records -> %s", actual_count, filepath)
-    return actual_count
+    return save_records(records, filename, OUTPUT_DIR)
 
 
 def save_gainers_losers(dataset_name, payload):
