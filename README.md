@@ -1,52 +1,58 @@
-# NSE Market Data Downloader
+# NSE Market Data Downloader & Data Quality Validator
 
-A Python project that collects market data from the National Stock Exchange of India (NSE), saves the results as CSV files, and validates data quality.
+A Python-based data engineering project that collects market data from the National Stock Exchange of India (NSE), stores it in CSV files, and validates the downloaded data for quality issues.
+
+## Project Overview
+
+This project automates the collection of selected NSE market datasets through HTTP API requests. It organizes the downloaded records into CSV files, validates records, logs execution details, and generates a data quality report.
 
 ## Features
 
-- Fetches data from configured NSE endpoints.
-- Collects top gainers and losers across multiple market categories.
-- Collects upper-band, lower-band, and both-band data.
-- Collects volume gainers and 52-week-high data.
-- Saves downloaded records into CSV files.
-- Handles request failures and retries failed requests.
-- Records download activity and errors in a log file.
-- Generates a download summary.
-- Validates missing symbols, duplicate symbols, numeric price values, and price ranges.
-- Creates a data quality report.
+- Downloads NSE top gainers and top losers.
+- Collects upper-band, lower-band, and both-band market data.
+- Downloads volume gainers and 52-week-high data.
+- Saves records to CSV files.
+- Validates record structure, duplicate symbols, and invalid floating-point values.
+- Checks missing symbols, numeric price values, and applicable price ranges.
+- Maintains download summaries and execution logs.
+- Includes automated tests using pytest.
+- Supports automated testing through GitHub Actions.
 
 ## Technologies Used
 
-- Python
+- Python 3.12
 - Requests
 - CSV and JSON
+- Pytest
 - Logging
-- pathlib
-- unittest / Python testing tools
+- Git and GitHub
+- GitHub Actions
 
 ## Project Structure
 
 ```text
 nse-market-data-downloader/
-├── data/
-├── logs/
 ├── src/
+│   ├── __init__.py
 │   ├── config.py
 │   ├── downloader.py
 │   ├── logger_config.py
 │   ├── storage.py
 │   └── validator.py
 ├── tests/
+│   └── test_project.py
+├── .github/
+│   └── workflows/
+│       └── main.yml
 ├── check_data_quality.py
 ├── download_nse_data.py
 ├── inspect_nse.py
 ├── main.py
-├── test_nse_api.py
 ├── requirements.txt
 └── README.md
 ```
 
-## Setup
+## Installation and Setup
 
 ### 1. Clone the repository
 
@@ -55,72 +61,73 @@ git clone https://github.com/vasanthi988/nse-market-data-downloader.git
 cd nse-market-data-downloader
 ```
 
-### 2. Create and activate a virtual environment
+### 2. Create a virtual environment
 
-Windows PowerShell:
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows PowerShell:
 
 ```powershell
-python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
 ### 3. Install dependencies
 
-```powershell
-pip install -r requirements.txt
+```bash
+python -m pip install -r requirements.txt
 ```
 
 ### 4. Download market data
 
-```powershell
-python .\download_nse_data.py
+```bash
+python download_nse_data.py
 ```
 
-Downloaded CSV files are saved in the `data/` directory.
+### 5. Run data quality checks
 
-### 5. Validate data quality
-
-```powershell
-python .\check_data_quality.py
+```bash
+python check_data_quality.py
 ```
 
-The script prints validation results and saves the report to:
+### 6. Run automated tests
 
-`data/data_quality_report.txt`
-
-### 6. View logs
-
-```powershell
-Get-Content .\logs\nse_downloader.log -Tail 30
+```bash
+python -m pytest -v
 ```
 
-## Data Quality Results
+## Output
 
-In a validation run on October 10, 2026:
+The application generates CSV files in the `data/` directory, a download summary, a data quality report, and execution logs.
 
-- Market-data CSV files checked: 25
-- Market-data records processed: 801
-- Missing symbols: 0
-- Duplicate symbols: 0
-- Missing applicable price values: 0
-- Numeric files passed: 25/25
+Example from a verified run:
+
+- Market-data CSV files: 25
+- Downloaded market-data records: 801
+- Missing symbols detected: 0
+- Duplicate symbols detected: 0
 - Invalid numeric price values: 0
-- Price-range records checked: 229
 - Price-range issues: 0
+- Automated tests: 8 passed
 
-Results may change with each new download.
+*These are results from one execution and may change as NSE data changes.*
 
-## Error Handling and Logging
+## Learning Outcomes
 
-The downloader logs successful operations and failures. HTTP requests use timeouts, and the configured downloader retries failed requests. A download summary records each dataset's status, output file count, record count, and errors.
+- Working with HTTP APIs and JSON responses.
+- Handling exceptions and logging application activity.
+- Organizing Python code into reusable modules.
+- Writing CSV files and validating downloaded data.
+- Creating automated tests with pytest.
+- Automating test execution using GitHub Actions.
 
-## Notes
+## Disclaimer
 
-- This project is intended for educational and data-analysis purposes.
-- Availability and response formats of NSE endpoints may change.
-- Network access and NSE server behavior can affect downloads.
-- Always verify the data before using it for financial decisions.
+This project is intended for educational and data-engineering practice. Market data availability and API responses may change. It does not provide investment advice or guarantee real-time data availability.
 
 ## Author
 
 Vasanthi Reddy
+
+[GitHub Repository](https://github.com/vasanthi988/nse-market-data-downloader)
