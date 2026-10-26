@@ -15,7 +15,8 @@ A Python project that downloads selected market datasets from the National Stock
 - Validates required fields, duplicate symbols, and invalid numeric values.
 - Saves datasets as separate, date-stamped CSV files.
 - Continues processing other datasets if one dataset fails.
-- Logs processing progress and errors to the console.
+- Logs processing progress and errors to the console and `logs/nse_downloader.log`.
+- Supports downloading all datasets or selecting one dataset.
 - Includes automated tests using pytest.
 
 ## Technologies Used
@@ -25,26 +26,6 @@ A Python project that downloads selected market datasets from the National Stock
 - CSV and JSON
 - Pytest
 - Git and GitHub
-
-## Project Structure
-
-```text
-nse-market-data-downloader/
-├── src/
-│   ├── config.py
-│   ├── downloader.py
-│   ├── logger_config.py
-│   ├── parser.py
-│   ├── storage.py
-│   └── validator.py
-├── tests/
-├── data/
-├── logs/
-├── main.py
-├── requirements.txt
-├── README.md
-└── .gitignore
-```
 
 ## Installation
 
@@ -62,7 +43,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-Install the dependencies:
+Install dependencies:
 
 ```powershell
 python -m pip install -r requirements.txt
@@ -70,24 +51,15 @@ python -m pip install -r requirements.txt
 
 ## Run the Downloader
 
-Run all configured datasets:
+### Download all datasets
 
 ```powershell
 python main.py
 ```
 
-The application requests data from NSE, parses the responses, validates the records, and saves successful results in the `data/` directory.
-### Download All Datasets
+### Download an individual dataset
 
-Run the following command to download all four NSE datasets:
-
-```powershell
-python main.py
-```
-
-### Download Individual Datasets
-
-Run any one of these commands to download only the selected dataset:
+Run any one of the following commands:
 
 ```powershell
 python main.py --dataset top-gainers-losers
@@ -96,38 +68,28 @@ python main.py --dataset volume-gainers-spurts
 python main.py --dataset 52-week-high-equity-market
 ```
 
-### Run Tests
+Successful downloads are saved in the `data/` directory. Output filenames include the execution date in `YYYY-MM-DD` format.
 
-```powershell
-python -m pytest -v
-```
-
-### Logs
-
-Application logs are displayed in the console and saved to `logs/nse_downloader.log`.
-
-### Output Files
-
-The filenames include the execution date in `YYYY-MM-DD` format. For example, on October 26, 2026:
+For example:
 
 - `top-gainers-losers_2026-10-26.csv`
 - `upper-band-hitters_2026-10-26.csv`
 - `volume-gainers-spurts_2026-10-26.csv`
 - `52-week-high-equity-market_2026-10-26.csv`
 
-The record counts can change based on the data available from NSE when the downloader runs. Running the downloader again on the same date overwrites the corresponding dated CSV files.
+Running the downloader again on the same date overwrites the corresponding dated CSV files. Record counts may vary depending on the data available from NSE.
 
 ## Data Validation
 
 The validation module checks:
 
-- Whether the input contains a list of dictionary records.
+- Whether input consists of a list of dictionary records.
 - Whether configured required fields contain values.
 - Whether duplicate symbols are present.
 - Whether floating-point values include invalid values such as `NaN` or infinity.
-- Whether the dataset passes validation before it is saved.
+- Whether each dataset passes validation before it is saved.
 
-Empty or invalid responses are handled as errors rather than being treated as successful downloads.
+Empty or invalid API responses are handled as errors rather than successful downloads.
 
 ## Error Handling
 
@@ -137,6 +99,14 @@ Empty or invalid responses are handled as errors rather than being treated as su
 - Validation failures prevent the affected dataset from being saved.
 - A failure in one dataset does not stop the remaining datasets from being processed.
 
+## Logging
+
+Application logs are displayed in the console and written to:
+
+```text
+logs/nse_downloader.log
+```
+
 ## Automated Testing
 
 Run the test suite:
@@ -145,7 +115,7 @@ Run the test suite:
 python -m pytest -v
 ```
 
-The current test suite contains eight tests covering dataset selection errors, CSV storage, invalid inputs, empty records, and basic record validation.
+The current test suite contains 13 tests covering dataset selection errors, retry behavior, invalid JSON, empty responses, CSV storage, invalid inputs, and record validation.
 
 ## Limitations
 
@@ -153,7 +123,7 @@ The current test suite contains eight tests covering dataset selection errors, C
 - NSE may change its API endpoints, response fields, or access restrictions.
 - Downloaded data reflects the response received when the application runs.
 - A successful HTTP response does not guarantee that every record is complete or suitable for financial analysis.
-- The current entry point processes all configured datasets; individual dataset selection is not documented as a supported command.
+- Automated tests use simulated responses for network error scenarios; they do not guarantee that NSE endpoints will always be available.
 
 ## Disclaimer
 
