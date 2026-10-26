@@ -107,3 +107,96 @@ def test_validate_records_detects_duplicate_symbols():
 
     assert result["duplicate_records"] == 1
     assert result["passed"] is False
+    
+import requests
+from src.downloader import fetch_url
+from src.parser import parse_dataset
+
+
+def test_fetch_url_retries_after_timeout(monkeypatch):
+    """A timeout should be retried before succeeding."""
+    import src.downloader as downloader
+
+    monkeypatch.setattr(downloader, "MAX_RETRIES", 2)
+    monkeypatch.setattr(downloader.time, "sleep", lambda _: None)
+
+    class FakeResponse:
+        status_code = 200
+        headers = {"Content-Type": "application/json"}
+
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"data": [{"symbol": "ABC", "ltp": 100}]}
+
+    class FakeSession:
+        calls = 0
+
+        def get(self, url, timeout):
+            self.calls += 1
+            if self.calls == 1:
+                raise requests.Timeout("Simulated timeout")
+            return FakeResponse()
+
+    session = FakeSession()
+    response = fetch_url(session, "https://example.com/api", "test")
+
+    assert response.status_code == 200
+    assert session.calls == 2
+
+
+def test_fetch_url_raises_after_retries(monkeypatch):
+    """Repeated network failures should raise an error."""
+    import src.downloader as downloader
+
+    monkeypatch.setattr(downloader, "MAX_RETRIES", 2)
+    monkeypatch.setattr(downloader.time, "sleep", lambda _: None)
+
+    class FakeSession:
+        calls = 0
+
+        def get(self, url, timeout):
+            self.calls += 1
+            raise requests.Timeout("Simulated timeout")
+
+    session = FakeSession()
+
+    with pytest.raises(requests.Timeout):
+        fetch_url(session, "https://example.com/api", "test")
+
+    assert session.calls == 2
+
+
+def test_parse_dataset_rejects_invalid_json():
+    """Invalid JSON should raise a clear error."""
+    class FakeResponse:
+        def json(self):
+            raise ValueError("Invalid JSON")
+
+    with pytest.raises(ValueError, match="not valid JSON"):
+        parse_dataset(FakeResponse(), "test")
+
+
+def test_parse_dataset_rejects_empty_response():
+    """An empty API response should not be accepted."""
+    class FakeResponse:
+        def json(self):
+            return {"data": []}
+
+    with pytest.raises(ValueError, match="No records found"):
+        parse_dataset(FakeResponse(), "test")
+
+
+def test_validate_records_detects_missing_required_fields():
+    """Missing required values should fail validation."""
+    records = [{"symbol": "ABC"}]
+
+    result = validate_records(
+        records,
+        required_fields=["symbol", "ltp"],
+    )
+
+    assert result["missing_required_fields"] == 1
+    assert result["passed"] is False
+
