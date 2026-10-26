@@ -36,3 +36,11 @@ DATASETS = {
 
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
+
+REQUIRED_FIELDS = {
+    "top-gainers-losers": ["symbol", "ltp"],
+    "upper-band-hitters": ["symbol", "ltp"],
+    "volume-gainers-spurts": ["symbol", "volume", "ltp"],
+    "52-week-high-equity-market": ["symbol", "ltp"],
+}
+

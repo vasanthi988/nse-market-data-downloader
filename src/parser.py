@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_dataset(response, dataset_name):
-    """Extract records from NSE JSON responses."""
+    """Extract unique records from NSE JSON responses."""
     responses = response if isinstance(response, list) else [response]
     records = []
 
@@ -18,8 +18,6 @@ def parse_dataset(response, dataset_name):
                     collect_records(item)
 
         elif isinstance(payload, dict):
-            # NSE often returns groups such as NIFTY and BANKNIFTY,
-            # each containing a "data" list.
             if isinstance(payload.get("data"), list):
                 collect_records(payload["data"])
             else:
@@ -37,15 +35,17 @@ def parse_dataset(response, dataset_name):
 
         collect_records(payload)
 
-    # Remove exact duplicate records.
     unique_records = []
     seen = set()
 
     for record in records:
         marker = tuple(
-            sorted((str(key), repr(value))
-                   for key, value in record.items())
+            sorted(
+                (str(key), repr(value))
+                for key, value in record.items()
+            )
         )
+
         if marker not in seen:
             seen.add(marker)
             unique_records.append(record)
