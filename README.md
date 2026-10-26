@@ -1,133 +1,71 @@
-# NSE Market Data Downloader & Data Quality Validator
+# NSE Market Data Downloader
 
-A Python-based data engineering project that collects market data from the National Stock Exchange of India (NSE), stores it in CSV files, and validates the downloaded data for quality issues.
-
-## Project Overview
-
-This project automates the collection of selected NSE market datasets through HTTP API requests. It organizes the downloaded records into CSV files, validates records, logs execution details, and generates a data quality report.
+A Python project that downloads selected market datasets from the National Stock Exchange of India (NSE), saves the data as CSV files, and supports data validation and automated testing.
 
 ## Features
 
-- Downloads NSE top gainers and top losers.
-- Collects upper-band, lower-band, and both-band market data.
-- Downloads volume gainers and 52-week-high data.
-- Saves records to CSV files.
-- Validates record structure, duplicate symbols, and invalid floating-point values.
-- Checks missing symbols, numeric price values, and applicable price ranges.
-- Maintains download summaries and execution logs.
-- Includes automated tests using pytest.
-- Supports automated testing through GitHub Actions.
+- Downloads top gainers and losers.
+- Downloads upper-band market data.
+- Downloads volume gainers and spurts.
+- Downloads 52-week-high equity-market data.
+- Handles HTTP requests, retries, and errors.
+- Parses JSON responses and removes duplicate records.
+- Saves downloaded records to CSV files.
+- Includes logging and automated tests.
 
 ## Technologies Used
 
 - Python 3.12
 - Requests
+- Pandas
 - CSV and JSON
 - Pytest
-- Logging
 - Git and GitHub
-- GitHub Actions
 
-## Project Structure
+## Installation
 
-```text
-nse-market-data-downloader/
-├── src/
-│   ├── __init__.py
-│   ├── config.py
-│   ├── downloader.py
-│   ├── logger_config.py
-│   ├── storage.py
-│   └── validator.py
-├── tests/
-│   └── test_project.py
-├── .github/
-│   └── workflows/
-│       └── main.yml
-├── check_data_quality.py
-├── download_nse_data.py
-├── inspect_nse.py
-├── main.py
-├── requirements.txt
-└── README.md
-```
-
-## Installation and Setup
-
-### 1. Clone the repository
+Clone the repository:
 
 ```bash
 git clone https://github.com/vasanthi988/nse-market-data-downloader.git
 cd nse-market-data-downloader
 ```
 
-### 2. Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-Activate it on Windows PowerShell:
+Install dependencies:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-### 3. Install dependencies
-
-```bash
 python -m pip install -r requirements.txt
 ```
 
-### 4. Download market data
+## Run the Downloader
 
-```bash
-python download_nse_data.py
+```powershell
+python main.py
 ```
 
-### 5. Run data quality checks
+The downloaded CSV files are saved in the `data/` directory.
 
-```bash
-python check_data_quality.py
-```
+Expected output filenames:
 
-### 6. Run automated tests
+- `top-gainers-losers.csv`
+- `upper-band-hitters.csv`
+- `volume-gainers-spurts.csv`
+- `52-week-high-equity-market.csv`
 
-```bash
+The number of records may change depending on the data returned by NSE.
+
+## Run Automated Tests
+
+```powershell
 python -m pytest -v
 ```
 
-## Output
-
-The application generates CSV files in the `data/` directory, a download summary, a data quality report, and execution logs.
-
-Example from a verified run:
-
-- Market-data CSV files: 25
-- Downloaded market-data records: 801
-- Missing symbols detected: 0
-- Duplicate symbols detected: 0
-- Invalid numeric price values: 0
-- Price-range issues: 0
-- Automated tests: 8 passed
-
-*These are results from one execution and may change as NSE data changes.*
-
-## Learning Outcomes
-
-- Working with HTTP APIs and JSON responses.
-- Handling exceptions and logging application activity.
-- Organizing Python code into reusable modules.
-- Writing CSV files and validating downloaded data.
-- Creating automated tests with pytest.
-- Automating test execution using GitHub Actions.
-
 ## Disclaimer
 
-This project is intended for educational and data-engineering practice. Market data availability and API responses may change. It does not provide investment advice or guarantee real-time data availability.
+This project is intended for educational and data-engineering practice. NSE endpoints and data availability may change. This project does not provide investment advice.
 
 ## Author
 
 Vasanthi Reddy
 
-[GitHub Repository](https://github.com/vasanthi988/nse-market-data-downloader)
+GitHub: https://github.com/vasanthi988/nse-market-data-downloader
